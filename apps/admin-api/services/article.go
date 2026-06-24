@@ -90,6 +90,11 @@ func (s *ArticleService) buildFrontmatter(article *models.ArticleDraft, tags []s
 	sb.WriteString(fmt.Sprintf("pinned: %t\n", article.Pinned))
 	sb.WriteString(fmt.Sprintf("comment: %t\n", article.CommentEnabled))
 	sb.WriteString(fmt.Sprintf("toc: %t\n", article.TocEnabled))
+	if article.AiSummary != "" {
+		sb.WriteString(fmt.Sprintf("aiSummary: \"%s\"\n", escapeYAML(article.AiSummary)))
+	} else {
+		sb.WriteString("aiSummary: \"\"\n")
+	}
 	sb.WriteString("---\n")
 
 	return sb.String()

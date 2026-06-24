@@ -1,2 +1,19 @@
-/* Default Light Theme — values are already in :root of variables.css.
-   This file is a placeholder for theme preset overrides (Phase 3). */
+/* Default Theme — Light, blue accent, rounded cards */
+
+[data-theme="default"] {
+  --color-bg: #ffffff;
+  --color-bg-soft: #f8fafc;
+  --color-text: #111827;
+  --color-text-muted: #6b7280;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-card: #ffffff;
+  --color-border: #e5e7eb;
+  --font-body: system-ui, -apple-system, "Noto Sans SC", sans-serif;
+  --font-code: "JetBrains Mono", "Fira Code", monospace;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-card-hover: 0 20px 40px rgba(15, 23, 42, 0.12);
+}

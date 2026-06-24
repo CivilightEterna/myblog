@@ -1,5 +1,5 @@
 ---
-import ThemeToggle from "./ThemeToggle.astro";
+import ThemePicker from "./ThemePicker.astro";
 import Icon from "./Icon.astro";
 import { siteConfig } from "@config/site.config";
 
@@ -9,7 +9,10 @@ const { nav } = siteConfig;
 <header class="site-header">
   <div class="container-wide header-inner">
     <a href="/" class="site-logo">
-      {siteConfig.title}
+      <span class="site-logo-img" id="siteLogoImg" style="display:none">
+        <img id="siteLogoImgEl" src="" alt="" />
+      </span>
+      <span class="site-logo-text" id="siteLogoText">{siteConfig.title}</span>
     </a>
 
     <nav class="site-nav" aria-label="主导航">
@@ -23,7 +26,7 @@ const { nav } = siteConfig;
       <a href="/rss.xml" class="nav-link nav-icon" aria-label="RSS" title="RSS 订阅">
         <Icon name="rss" size={18} />
       </a>
-      <ThemeToggle />
+      <ThemePicker />
     </nav>
 
     <!-- Mobile menu button -->
@@ -71,14 +74,21 @@ const { nav } = siteConfig;
   }
 
   .site-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 1.25rem;
     font-weight: 800;
     color: var(--color-text);
     letter-spacing: -0.02em;
+    text-decoration: none;
   }
-
-  .site-logo:hover {
-    color: var(--color-primary);
+  .site-logo:hover { color: var(--color-primary); }
+  .site-logo-img { display: flex; align-items: center; flex-shrink: 0; }
+  .site-logo-img img {
+    width: 32px; height: 32px;
+    border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--color-border);
   }
 
   .site-nav {
@@ -174,4 +184,24 @@ const { nav } = siteConfig;
 
   initMobileMenu();
   document.addEventListener("astro:after-swap", initMobileMenu);
+
+  // Load dynamic site info
+  (async function(){
+    try {
+      const r = await fetch('/api/public/site-config');
+      if (!r.ok) return;
+      const cfg = await r.json();
+      if (cfg.site_name) document.getElementById('siteLogoText').textContent = cfg.site_name;
+      const avatar = cfg.site_avatar || '';
+      const logo = cfg.site_logo || '';
+      const imgSrc = logo || avatar;
+      if (imgSrc) {
+        const wrap = document.getElementById('siteLogoImg');
+        const img = document.getElementById('siteLogoImgEl');
+        img.src = imgSrc;
+        img.alt = cfg.site_name || 'Logo';
+        wrap.style.display = 'flex';
+      }
+    } catch(e){ /* use default */ }
+  })();
 </script>

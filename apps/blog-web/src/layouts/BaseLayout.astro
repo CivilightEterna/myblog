@@ -2,9 +2,12 @@
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import FeatureHost from "@features/FeatureHost.astro";
+import ReadingProgress from "@components/ReadingProgress.vue";
 import { siteConfig } from "@config/site.config";
 import "@/styles/global.css";
 import "@/styles/markdown.css";
+import fs from "node:fs";
+import path from "node:path";
 
 export interface Props {
   title?: string;
@@ -15,10 +18,32 @@ export interface Props {
 const { title, description, ogImage } = Astro.props;
 const pageTitle = title ? `${title} — ${siteConfig.title}` : siteConfig.title;
 const pageDesc = description || siteConfig.description;
+
+// Read background settings from build-time generated config
+let bgImage = "";
+let bgOpacity = "0.18";
+let bgMode = "cover";
+let bgEnabled = false;
+
+try {
+  const configPath = path.join(process.cwd(), "public", "data", "site-config.json");
+  if (fs.existsSync(configPath)) {
+    const raw = fs.readFileSync(configPath, "utf-8");
+    const cfg = JSON.parse(raw);
+    if (cfg.site_background_enabled === "true" && cfg.site_background_image) {
+      bgEnabled = true;
+      bgImage = cfg.site_background_image;
+      bgOpacity = cfg.site_background_opacity || "0.18";
+      bgMode = cfg.site_background_mode || "cover";
+    }
+  }
+} catch (_) {
+  // No config yet — use defaults
+}
 ---
 
 <!DOCTYPE html>
-<html lang={siteConfig.lang}>
+<html lang={siteConfig.lang} data-home-layout="classic" data-post-layout="sidebar">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,21 +64,50 @@ const pageDesc = description || siteConfig.description;
 
     <title>{pageTitle}</title>
 
-    <!-- Theme init — prevent flash of wrong theme -->
+    <!-- Theme init — prevent flash of wrong theme before page renders -->
     <script is:inline>
       (function() {
-        const saved = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        if (saved === "dark" || (!saved && prefersDark)) {
-          document.documentElement.setAttribute("data-theme", "dark");
-        } else {
-          document.documentElement.setAttribute("data-theme", "light");
+        const presets = {
+          default:  { theme: "default",  homeLayout: "classic",  postLayout: "sidebar" },
+          minimal:  { theme: "minimal",  homeLayout: "minimal",  postLayout: "clean" },
+          dark:     { theme: "dark",     homeLayout: "classic",  postLayout: "sidebar" },
+          terminal: { theme: "terminal", homeLayout: "terminal", postLayout: "clean" },
+        };
+        const key = localStorage.getItem("activeTheme") || "default";
+        const p = presets[key] || presets.default;
+        document.documentElement.setAttribute("data-theme", p.theme);
+        document.documentElement.setAttribute("data-home-layout", p.homeLayout);
+        document.documentElement.setAttribute("data-post-layout", p.postLayout);
+      })();
+    </script>
+      <!-- Dynamic background config — runtime fetch from API, no rebuild needed -->
+    <script is:inline>
+      (async function() {
+        try {
+          const resp = await fetch('/api/public/site-config');
+          if (!resp.ok) throw new Error('API not available');
+          const cfg = await resp.json();
+
+          const root = document.documentElement;
+          if (cfg.site_background_enabled === 'true' && cfg.site_background_image) {
+            root.style.setProperty('--site-background-image', `url(${cfg.site_background_image})`);
+            root.style.setProperty('--site-background-opacity', cfg.site_background_opacity || '0.18');
+            root.style.setProperty('--site-background-size', cfg.site_background_mode || 'cover');
+            root.style.setProperty('--site-background-position', cfg.site_background_position || 'center');
+            root.setAttribute('data-background-enabled', 'true');
+          } else {
+            root.removeAttribute('data-background-enabled');
+          }
+        } catch (e) {
+          // API unavailable — fall back to static site-config.json or build-time values
+          console.log('Dynamic config not available, using static fallback');
         }
       })();
     </script>
   </head>
 
   <body>
+    <ReadingProgress client:load />
     <Header />
 
     <main>
@@ -74,6 +128,39 @@ const pageDesc = description || siteConfig.description;
     </button>
   </body>
 </html>
+
+<style is:global>
+  /* Site background layer — controlled by CSS variables set at runtime */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--site-background-image, none);
+    background-size: var(--site-background-size, cover);
+    background-position: var(--site-background-position, center);
+    background-repeat: no-repeat;
+    opacity: var(--site-background-opacity, 0.18);
+    pointer-events: none;
+  }
+
+  /* Hide pseudo-element when no background is set */
+  html:not([data-background-enabled]) body::before {
+    display: none;
+  }
+
+  /* Dark theme overlay for readability */
+  [data-theme="dark"][data-background-enabled] body::before,
+  [data-theme="terminal"][data-background-enabled] body::before {
+    filter: brightness(0.4);
+  }
+
+  /* Ensure content cards remain readable over background */
+  [data-home-layout="classic"][data-background-enabled] .post-card,
+  [data-home-layout="magazine"][data-background-enabled] .post-card {
+    backdrop-filter: blur(2px);
+  }
+</style>
 
 <style>
   .back-to-top {

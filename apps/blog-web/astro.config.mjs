@@ -24,6 +24,12 @@ export default defineConfig({
         external: ["/pagefind/pagefind.js"],
       },
     },
+    server: {
+      proxy: {
+        "/api": "http://localhost:8080",
+        "/uploads": "http://localhost:8080",
+      },
+    },
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),

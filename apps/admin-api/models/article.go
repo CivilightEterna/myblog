@@ -15,9 +15,12 @@ type ArticleDraft struct {
 	Pinned          bool       `gorm:"default:false" json:"pinned"`
 	CommentEnabled  bool       `gorm:"default:true" json:"comment_enabled"`
 	TocEnabled      bool       `gorm:"default:true" json:"toc_enabled"`
-	ContentVersion  int        `gorm:"default:1" json:"content_version"`
-	WordCount       int        `gorm:"default:0" json:"word_count"`
-	PublishedAt     *time.Time `json:"published_at"`
+	ContentVersion     int        `gorm:"default:1" json:"content_version"`
+	WordCount          int        `gorm:"default:0" json:"word_count"`
+	AiSummary          string     `json:"ai_summary"`
+	AiSummaryGeneratedAt *time.Time `json:"ai_summary_generated_at"`
+	AiSummaryModel     string     `json:"ai_summary_model"`
+	PublishedAt        *time.Time `json:"published_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 	CreatedAt       time.Time  `json:"created_at"`
 }

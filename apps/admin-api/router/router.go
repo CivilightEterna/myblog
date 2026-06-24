@@ -15,7 +15,7 @@ import (
 func Setup(cfg *config.Config) *gin.Engine {
 	r := gin.Default()
 
-	// CORS with configurable origins — never use * in production
+	// CORS with configurable origins
 	r.Use(corsMiddleware(cfg.CORSOrigin))
 
 	// Security headers
@@ -36,13 +36,22 @@ func Setup(cfg *config.Config) *gin.Engine {
 	uploadHandler := handlers.NewUploadHandler(cfg.BlogRoot)
 	settingHandler := handlers.NewSettingHandler()
 	buildHandler := handlers.NewBuildHandler(buildService)
+	aiHandler := handlers.NewAIHandler()
 
+	// === Public routes (no auth) ===
+	public := r.Group("/api/public")
+	{
+		public.GET("/site-config", settingHandler.GetPublicConfig)
+	}
+
+	// === Static uploads (public, read-only) ===
+	r.Static("/uploads", cfg.BlogRoot+"/apps/blog-web/public/uploads")
+
+	// === Admin routes (JWT required) ===
 	api := r.Group("/api/admin")
 	{
-		// Rate limit login attempts (simple — in production use a proper rate limiter)
 		api.POST("/login", authHandler.Login)
 
-		// All other routes require JWT
 		protected := api.Group("")
 		protected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 		{
@@ -57,11 +66,13 @@ func Setup(cfg *config.Config) *gin.Engine {
 			protected.DELETE("/articles/:id", articleHandler.DeleteArticle)
 			protected.POST("/articles/:id/publish", articleHandler.PublishArticle)
 			protected.POST("/articles/:id/unpublish", articleHandler.UnpublishArticle)
+			protected.POST("/articles/:id/ai-summary", aiHandler.GenerateSummary)
 
 			// Uploads
 			protected.POST("/uploads", uploadHandler.Upload)
 			protected.GET("/uploads", uploadHandler.ListUploads)
 			protected.DELETE("/uploads/:id", uploadHandler.DeleteUpload)
+			protected.POST("/uploads/:id/set-background", uploadHandler.SetBackground)
 
 			// Settings
 			protected.GET("/settings", settingHandler.GetSettings)
@@ -77,7 +88,6 @@ func Setup(cfg *config.Config) *gin.Engine {
 	return r
 }
 
-// corsMiddleware validates the origin against the allowed list
 func corsMiddleware(allowedOrigins string) gin.HandlerFunc {
 	allowed := strings.Split(allowedOrigins, ",")
 	for i := range allowed {
@@ -86,8 +96,6 @@ func corsMiddleware(allowedOrigins string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-
-		// Check if origin is allowed
 		allowed_ := false
 		for _, o := range allowed {
 			if o == origin || o == "*" {
@@ -95,23 +103,18 @@ func corsMiddleware(allowedOrigins string) gin.HandlerFunc {
 				break
 			}
 		}
-
 		if allowed_ {
 			c.Header("Access-Control-Allow-Origin", origin)
 		} else if origin != "" {
-			// Don't set Allow-Origin for disallowed origins — browser will block
 			c.Header("Access-Control-Allow-Origin", allowed[0])
 		}
-
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Header("Access-Control-Max-Age", "86400")
-
 		if c.Request.Method == http.MethodOptions {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
-
 		c.Next()
 	}
 }

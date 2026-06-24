@@ -9,15 +9,16 @@ const title = "关于";
     <h1 class="about-title">{title}</h1>
 
     <div class="about-content">
-      <div class="about-avatar">
-        <div class="avatar-placeholder">
-          👤
+      <div class="about-avatar" id="aboutAvatarWrap">
+        <div class="avatar-placeholder" id="aboutAvatarPH">
+          <img id="aboutAvatarImg" src="" alt="" style="display:none;width:96px;height:96px;border-radius:50%;object-fit:cover" />
+          <span id="aboutAvatarFallback">👤</span>
         </div>
       </div>
 
-      <h2>你好，我是 Blog Author</h2>
+      <h2 id="aboutGreeting">你好，我是 Blog Author</h2>
 
-      <p>
+      <p id="aboutDesc">
         这是一位热爱技术的开发者，在这里记录学习过程中的思考和总结。
       </p>
 
@@ -138,3 +139,21 @@ const title = "关于";
     color: var(--color-primary);
   }
 </style>
+
+<script>
+  (async function(){
+    try {
+      const r = await fetch('/api/public/site-config');
+      if (!r.ok) return;
+      const cfg = await r.json();
+      if (cfg.site_author) document.getElementById('aboutGreeting').textContent = '你好，我是 ' + cfg.site_author;
+      if (cfg.site_description) document.getElementById('aboutDesc').textContent = cfg.site_description;
+      if (cfg.site_avatar) {
+        var img = document.getElementById('aboutAvatarImg');
+        img.src = cfg.site_avatar;
+        img.style.display = 'block';
+        document.getElementById('aboutAvatarFallback').style.display = 'none';
+      }
+    } catch(e){ /* default */ }
+  })();
+</script>

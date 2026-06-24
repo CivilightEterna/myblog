@@ -8,6 +8,7 @@ type UploadFile struct {
 	OriginalName string    `json:"original_name"`
 	Path         string    `gorm:"not null" json:"path"`
 	URL          string    `gorm:"not null" json:"url"`
+	Category     string    `gorm:"default:common" json:"category"`
 	MimeType     string    `json:"mime_type"`
 	Size         int64     `json:"size"`
 	Hash         string    `json:"hash"`

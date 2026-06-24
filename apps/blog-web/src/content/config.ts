@@ -15,6 +15,7 @@ const posts = defineCollection({
     pinned: z.boolean().default(false),
     comment: z.boolean().default(true),
     toc: z.boolean().default(true),
+    aiSummary: z.string().optional().default(""),
   }),
 });
 

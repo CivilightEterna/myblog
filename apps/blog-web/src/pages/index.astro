@@ -1,202 +1,289 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
-import ClassicHome from "@layouts/home/ClassicHome.astro";
-import FeatureHost from "@features/FeatureHost.astro";
-import { getPublishedPosts, getCategories, getTags } from "@utils/post";
-import { getCollection } from "astro:content";
-
-const allPosts = await getCollection("posts");
-const publishedPosts = getPublishedPosts(allPosts);
-
-const pinnedPosts = publishedPosts.filter((p) => p.data.pinned);
-const latestPosts = publishedPosts
-  .filter((p) => !p.data.pinned)
-  .slice(0, 6);
-
-const categories = getCategories(allPosts);
-const tags = getTags(allPosts);
+// Landing page — fullscreen hero with glassmorphism card + animations
 ---
 
-<BaseLayout>
-  <div class="container-wide">
-    <ClassicHome pinnedPosts={pinnedPosts} latestPosts={latestPosts} />
-
-    <!-- Two-column layout: main content + sidebar -->
-    <div class="home-body">
-      <div class="home-main">
-        <!-- Categories -->
-        <section class="home-section">
-          <h2 class="section-title">分类</h2>
-          <div class="category-grid">
-            {[...categories.entries()].map(([cat, count]) => (
-              <a href={`/categories/${cat}`} class="category-card">
-                <span class="category-name">{cat}</span>
-                <span class="category-count">{count} 篇</span>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <!-- Tag Cloud -->
-        {tags.size > 0 && (
-          <section class="home-section">
-            <h2 class="section-title">标签</h2>
-            <div class="tag-cloud">
-              {[...tags.entries()].map(([tag, count]) => (
-                <a href={`/tags/${tag}`} class="tag-cloud-item">
-                  {tag} <span class="tag-cloud-count">({count})</span>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <!-- View all link -->
-        {publishedPosts.length > 6 && (
-          <div class="view-all">
-            <a href="/archives" class="view-all-link">
-              查看全部 {publishedPosts.length} 篇文章 →
-            </a>
-          </div>
-        )}
-      </div>
-
-      <!-- Sidebar: Features -->
-      <aside class="home-sidebar">
-        <FeatureHost position="home-sidebar" />
-      </aside>
-    </div>
-  </div>
-</BaseLayout>
-
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InkSpace</title>
+<meta name="description" content="写作、技术与生活的私人空间">
 <style>
-  .home-body {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Noto Sans SC",sans-serif;overflow-x:hidden}
+
+  .landing-page{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  /* Background */
+  .landing-bg{position:absolute;inset:0;z-index:0}
+  .landing-bg-default{position:absolute;inset:0;background:linear-gradient(135deg,#1a0533 0%,#0f0a2e 30%,#1a1040 60%,#0d1b3e 100%)}
+  .landing-bg-stars{position:absolute;inset:0}
+  .landing-bg-image{position:absolute;inset:0;background-size:cover;background-position:center;display:none}
+
+  /* Overlay */
+  .landing-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,5,30,0.2) 0%,rgba(10,5,30,0.15) 50%,rgba(10,5,30,0.3) 100%)}
+
+  /* Effects layer */
+  .landing-effects{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+
+  /* Content */
+  .landing-content{position:relative;z-index:3;padding:2rem;text-align:center;width:100%}
+  .landing-card{max-width:560px;margin:0 auto;padding:3rem 2.5rem;background:rgba(255,255,255,0.08);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+
+  .landing-title{font-size:3.5rem;font-weight:800;color:#fff;margin:0 0 0.75rem;text-shadow:0 2px 20px rgba(168,139,250,0.4);letter-spacing:0.03em}
+  .landing-subtitle{font-size:1.15rem;color:rgba(255,255,255,0.85);margin:0 0 1rem;font-weight:300;letter-spacing:0.04em}
+  .landing-desc{font-size:0.95rem;color:rgba(255,255,255,0.65);line-height:1.8;margin:0 auto 2rem;max-width:420px}
+
+  /* Quote */
+  .landing-quote-wrap{margin-bottom:2rem}
+  .landing-quote{border-left:3px solid rgba(168,139,250,0.5);padding:0.6rem 1.25rem;margin:0;text-align:left;max-width:420px;margin:0 auto}
+  .landing-quote-text{font-size:0.95rem;color:rgba(255,255,255,0.8);font-style:italic;margin:0;line-height:1.7}
+  .landing-quote-author{font-size:0.8rem;color:rgba(255,255,255,0.45);margin-top:0.5rem;display:block}
+  .landing-quote-author::before{content:"\2014\00a0"}
+
+  /* Avatar */
+  .landing-avatar{display:flex;justify-content:center;margin-bottom:1.25rem}
+  .landing-avatar img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.25);box-shadow:0 4px 20px rgba(0,0,0,0.2)}
+
+  /* Button */
+  .landing-btn{display:inline-block;margin-top:0.5rem;padding:0.85rem 3rem;font-size:1.05rem;font-weight:600;color:#fff;text-decoration:none;background:linear-gradient(135deg,rgba(168,139,250,0.4),rgba(139,92,246,0.5));border:1px solid rgba(255,255,255,0.2);border-radius:999px;transition:all 0.35s ease;backdrop-filter:blur(8px);letter-spacing:0.03em;position:relative;overflow:hidden}
+  .landing-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);opacity:0;transition:opacity 0.35s}
+  .landing-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(139,92,246,0.35);border-color:rgba(255,255,255,0.35)}
+  .landing-btn:hover::after{opacity:1}
+
+  /* Scroll hint */
+  .landing-scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.4);font-size:0.75rem;letter-spacing:0.05em;animation:scroll-bounce 2s ease-in-out infinite}
+  .landing-scroll-arrow{width:20px;height:20px;border-right:1px solid rgba(255,255,255,0.3);border-bottom:1px solid rgba(255,255,255,0.3);transform:rotate(45deg)}
+  @keyframes scroll-bounce{0%,100%{opacity:0.4;transform:translateX(-50%) translateY(0)}50%{opacity:1;transform:translateX(-50%) translateY(6px)}}
+
+  /* Sakura petals */
+  .sakura-petal{position:absolute;border-radius:50% 0 50% 0;pointer-events:none;animation:sakura-fall linear infinite}
+  @keyframes sakura-fall{0%{transform:translateY(-10vh) rotate(0deg) translateX(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg) translateX(var(--drift,50px));opacity:0}}
+
+  /* Glow orbs */
+  .glow-orb{position:absolute;border-radius:50%;pointer-events:none;animation:glow-float ease-in-out infinite}
+  @keyframes glow-float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(var(--gx,30px),var(--gy,-40px)) scale(1.15)}}
+
+  /* Particles */
+  .particle{position:absolute;border-radius:50%;pointer-events:none;animation:particle-rise ease-in-out infinite}
+  @keyframes particle-rise{0%,100%{opacity:0.3;transform:translateY(0)}50%{opacity:0.8;transform:translateY(-30px)}}
+
+  /* Mobile */
+  @media(max-width:640px){
+    .landing-card{max-width:92vw;padding:2rem 1.5rem}
+    .landing-title{font-size:2.5rem}
+    .landing-subtitle{font-size:1rem}
+    .landing-btn{padding:0.75rem 2.25rem;font-size:0.95rem}
   }
-
-  .home-main {
-    min-width: 0;
-  }
-
-  .home-sidebar {
-    position: sticky;
-    top: 80px;
-    align-self: start;
-  }
-
-  .home-section {
-    margin-bottom: 3rem;
-  }
-
-  .section-title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--color-border);
-    color: var(--color-text);
-  }
-
-  .category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-  }
-
-  .category-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .category-card:hover {
-    border-color: var(--color-primary);
-    box-shadow: var(--shadow-card);
-  }
-
-  .category-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .category-count {
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
-  }
-
-  .tag-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.625rem;
-  }
-
-  .tag-cloud-item {
-    display: inline-block;
-    padding: 0.375rem 0.875rem;
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    background: var(--color-bg-soft);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .tag-cloud-item:hover {
-    color: var(--color-primary);
-    border-color: var(--color-primary);
-  }
-
-  .tag-cloud-count {
-    font-size: 0.75rem;
-    opacity: 0.7;
-  }
-
-  .view-all {
-    text-align: center;
-    margin-top: 2rem;
-  }
-
-  .view-all-link {
-    display: inline-block;
-    padding: 0.75rem 2rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-primary);
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .view-all-link:hover {
-    background: var(--color-primary);
-    color: #fff;
-  }
-
-  @media (max-width: 900px) {
-    .home-body {
-      grid-template-columns: 1fr;
-    }
-
-    .home-sidebar {
-      position: static;
-      order: -1;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .category-grid {
-      grid-template-columns: 1fr 1fr;
-    }
+  @media(prefers-reduced-motion:reduce){
+    .landing-effects{display:none}
+    .landing-scroll-hint{display:none}
+    .sakura-petal,.glow-orb,.particle{display:none}
   }
 </style>
+</head>
+<body>
+
+<div class="landing-page">
+  <!-- Background -->
+  <div class="landing-bg">
+    <div class="landing-bg-default"></div>
+    <div id="bgImage" class="landing-bg-image"></div>
+  </div>
+  <div class="landing-overlay"></div>
+
+  <!-- Effects -->
+  <div class="landing-effects" id="effectsLayer"></div>
+
+  <!-- Content -->
+  <div class="landing-content">
+    <div class="landing-card">
+      <div class="landing-avatar" id="lAvatarWrap" style="display:none">
+        <img id="lAvatarImg" src="" alt="" />
+      </div>
+      <h1 class="landing-title" id="lTitle">InkSpace</h1>
+      <p class="landing-subtitle" id="lSubtitle"></p>
+      <p class="landing-desc" id="lDesc"></p>
+      <div class="landing-quote-wrap" id="lQuoteWrap">
+        <blockquote class="landing-quote">
+          <p class="landing-quote-text" id="lQuoteText"></p>
+          <span class="landing-quote-author" id="lQuoteAuthor"></span>
+        </blockquote>
+      </div>
+      <a class="landing-btn" id="lBtn" href="/blog"></a>
+    </div>
+  </div>
+
+  <div class="landing-scroll-hint">
+    <span id="scrollLabel"></span>
+    <div class="landing-scroll-arrow"></div>
+  </div>
+</div>
+
+<script>
+// ======== Config loader ========
+(async function(){
+  const DEFAULTS = {
+    landing_title: "InkSpace",
+    landing_subtitle: "写作、技术与生活的私人空间",
+    landing_description: "记录后端、数据库、AI 与那些偶然闪光的想法。",
+    landing_button_text: "进入博客",
+    landing_button_link: "/blog",
+    landing_quote_enabled: "true",
+    landing_quote_text: "愿你在代码与星光之间，找到自己的小宇宙。",
+    landing_quote_author: "",
+    landing_cover_image: "",
+    landing_overlay_opacity: "0.25",
+    landing_animation_style: "sakura",
+    landing_animation_enabled: "true",
+    landing_anime_style_enabled: "true",
+    landing_blur_card_enabled: "true",
+    landing_card_opacity: "0.35",
+    landing_accent_color: "#a78bfa",
+    landing_text_position: "center",
+  };
+
+  let cfg = {};
+  try {
+    const r = await fetch('/api/public/site-config');
+    if (r.ok) { const d = await r.json(); Object.assign(cfg, d); }
+  } catch(e){ /* offline */ }
+
+  // Merge defaults (config values win if valid)
+  for (const [k,v] of Object.entries(DEFAULTS)){
+    if (!cfg[k] || cfg[k] === '') cfg[k] = v;
+  }
+
+  // If landing disabled, redirect
+  if (cfg.landing_enabled === 'false'){
+    location.replace(cfg.landing_button_link || '/blog');
+    return;
+  }
+
+  // Background
+  if (cfg.landing_cover_image && cfg.landing_cover_image.length > 5){
+    var bgEl = document.getElementById('bgImage');
+    bgEl.style.display = 'block';
+    bgEl.style.backgroundImage = 'url('+cfg.landing_cover_image+')';
+  }
+
+  // Overlay
+  var ov = parseFloat(cfg.landing_overlay_opacity);
+  if (isNaN(ov)) ov = 0.25;
+  document.querySelector('.landing-overlay').style.background =
+    'linear-gradient(180deg,rgba(10,5,30,'+(ov*0.7)+') 0%,rgba(10,5,30,'+(ov*0.5)+') 50%,rgba(10,5,30,'+ov+') 100%)';
+
+  // Avatar
+  var avatarUrl = cfg.site_avatar || '';
+  if (avatarUrl) {
+    document.getElementById('lAvatarWrap').style.display = 'flex';
+    document.getElementById('lAvatarImg').src = avatarUrl;
+  }
+
+  // Text — site_name as default for landing_title
+  var siteName = cfg.site_name || 'InkSpace';
+  document.getElementById('lTitle').textContent = cfg.landing_title || siteName;
+  document.getElementById('lSubtitle').textContent = cfg.landing_subtitle;
+  document.getElementById('lDesc').textContent = cfg.landing_description;
+
+  // Button
+  var btn = document.getElementById('lBtn');
+  btn.textContent = cfg.landing_button_text;
+  btn.href = cfg.landing_button_link;
+
+  // Scroll hint
+  document.getElementById('scrollLabel').textContent = cfg.landing_description || 'Scroll';
+
+  // Quote
+  if (cfg.landing_quote_enabled === 'true' && cfg.landing_quote_text){
+    document.getElementById('lQuoteWrap').style.display = 'block';
+    document.getElementById('lQuoteText').textContent = cfg.landing_quote_text;
+    if (cfg.landing_quote_author){
+      document.getElementById('lQuoteAuthor').textContent = cfg.landing_quote_author;
+    }
+  } else {
+    document.getElementById('lQuoteWrap').style.display = 'none';
+  }
+
+  // Position
+  if (cfg.landing_text_position === 'left'){
+    document.querySelector('.landing-content').style.textAlign = 'left';
+  } else if (cfg.landing_text_position === 'right'){
+    document.querySelector('.landing-content').style.textAlign = 'right';
+  }
+
+  // Accent
+  var accent = cfg.landing_accent_color || '#a78bfa';
+  document.documentElement.style.setProperty('--landing-accent', accent);
+
+  // Glow animation — always on for visual appeal
+  var effects = document.getElementById('effectsLayer');
+  spawnGlowOrbs(effects, accent);
+
+  if (cfg.landing_animation_enabled !== 'false'){
+    var style = cfg.landing_animation_style || 'sakura';
+    if (style === 'sakura' || style === 'none'){
+      spawnSakura(effects, 25);
+    }
+    if (style === 'particles'){
+      spawnParticles(effects, 30);
+    }
+  }
+})();
+
+// ======== Sakura petals ========
+function spawnSakura(container, count){
+  for (var i=0;i<count;i++){
+    var p = document.createElement('div');
+    p.className = 'sakura-petal';
+    var size = 8 + Math.random()*14;
+    p.style.cssText =
+      'width:'+size+'px;height:'+size+'px;'+
+      'background:rgba(255,183,197,'+(0.3+Math.random()*0.4)+');'+
+      'left:'+(Math.random()*100)+'%;'+
+      'animation-duration:'+(8+Math.random()*10)+'s;'+
+      'animation-delay:'+(Math.random()*8)+'s;'+
+      '--drift:'+(Math.random()*100-50)+'px;'+
+      'top:-5%';
+    container.appendChild(p);
+  }
+}
+
+// ======== Glow orbs ========
+function spawnGlowOrbs(container, accent){
+  var colors = ['rgba(168,139,250,0.06)','rgba(236,72,153,0.05)','rgba(99,102,241,0.06)','rgba(168,139,250,0.04)'];
+  for (var i=0;i<4;i++){
+    var orb = document.createElement('div');
+    orb.className = 'glow-orb';
+    var size = 180 + Math.random()*250;
+    orb.style.cssText =
+      'width:'+size+'px;height:'+size+'px;'+
+      'background:radial-gradient(circle,'+colors[i]+' 0%,transparent 70%);'+
+      'left:'+(10+Math.random()*80)+'%;'+
+      'top:'+(10+Math.random()*80)+'%;'+
+      'animation-duration:'+(18+Math.random()*12)+'s;'+
+      'animation-delay:'+(Math.random()*8)+'s;'+
+      '--gx:'+(Math.random()*60-30)+'px;'+
+      '--gy:'+(Math.random()*-60-20)+'px';
+    container.appendChild(orb);
+  }
+}
+
+// ======== Particles ========
+function spawnParticles(container, count){
+  for (var i=0;i<count;i++){
+    var dot = document.createElement('div');
+    dot.className = 'particle';
+    dot.style.cssText =
+      'width:'+(2+Math.random()*4)+'px;height:'+(2+Math.random()*4)+'px;'+
+      'background:rgba(255,255,255,'+(0.4+Math.random()*0.4)+');'+
+      'left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;'+
+      'animation-duration:'+(8+Math.random()*10)+'s;'+
+      'animation-delay:'+(Math.random()*6)+'s';
+    container.appendChild(dot);
+  }
+}
+</script>
+</body>
+</html>

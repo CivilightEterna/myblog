@@ -33,6 +33,7 @@ type CreateArticleRequest struct {
 	Pinned         bool     `json:"pinned"`
 	CommentEnabled bool     `json:"comment_enabled"`
 	TocEnabled     bool     `json:"toc_enabled"`
+	AiSummary      string   `json:"ai_summary"`
 }
 
 // ListArticles returns all articles with optional filters
@@ -112,6 +113,7 @@ func (h *ArticleHandler) CreateArticle(c *gin.Context) {
 		Pinned:         req.Pinned,
 		CommentEnabled: req.CommentEnabled,
 		TocEnabled:     req.TocEnabled,
+		AiSummary:      req.AiSummary,
 		ContentVersion: 1,
 		WordCount:      countWords(req.Content),
 	}
@@ -162,6 +164,7 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 	article.Pinned = req.Pinned
 	article.CommentEnabled = req.CommentEnabled
 	article.TocEnabled = req.TocEnabled
+	article.AiSummary = req.AiSummary
 	article.WordCount = newWordCount
 
 	if err := database.DB.Save(&article).Error; err != nil {

@@ -1,0 +1,120 @@
+---
+// ThemePicker — switches between 4 theme presets
+// Updates data-theme, data-home-layout, data-post-layout on <html>
+---
+
+<div class="theme-picker" id="theme-picker">
+  <button class="tp-btn active" data-theme-key="default" title="默认主题">
+    <span class="tp-dot" style="background:#3b82f6"></span>
+    <span class="tp-label">默认</span>
+  </button>
+  <button class="tp-btn" data-theme-key="minimal" title="极简主题">
+    <span class="tp-dot" style="background:#111827"></span>
+    <span class="tp-label">极简</span>
+  </button>
+  <button class="tp-btn" data-theme-key="dark" title="暗黑主题">
+    <span class="tp-dot" style="background:#8b5cf6"></span>
+    <span class="tp-label">暗黑</span>
+  </button>
+  <button class="tp-btn" data-theme-key="terminal" title="终端主题">
+    <span class="tp-dot" style="background:#22c55e"></span>
+    <span class="tp-label">终端</span>
+  </button>
+</div>
+
+<style>
+  .theme-picker {
+    display: flex;
+    gap: 4px;
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 3px;
+  }
+
+  .tp-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+  }
+
+  .tp-btn.active {
+    background: var(--color-card);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card);
+  }
+
+  .tp-btn:hover:not(.active) {
+    color: var(--color-text);
+  }
+
+  .tp-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    .tp-label { display: none; }
+    .tp-btn { padding: 6px 8px; }
+  }
+</style>
+
+<script>
+  const presets = {
+    default:  { theme: "default",  homeLayout: "classic",  postLayout: "sidebar", mode: "light" },
+    minimal:  { theme: "minimal",  homeLayout: "minimal",  postLayout: "clean",   mode: "light" },
+    dark:     { theme: "dark",     homeLayout: "classic",  postLayout: "sidebar", mode: "dark" },
+    terminal: { theme: "terminal", homeLayout: "terminal", postLayout: "clean",   mode: "dark" },
+  };
+
+  function activateTheme(key: string) {
+    const p = presets[key];
+    if (!p) return;
+
+    // Update <html> attributes
+    document.documentElement.setAttribute("data-theme", p.theme);
+    document.documentElement.setAttribute("data-home-layout", p.homeLayout);
+    document.documentElement.setAttribute("data-post-layout", p.postLayout);
+
+    // Persist
+    localStorage.setItem("activeTheme", key);
+
+    // Update button states
+    document.querySelectorAll(".tp-btn").forEach((btn) => {
+      btn.classList.toggle("active", (btn as HTMLElement).dataset.themeKey === key);
+    });
+  }
+
+  function initThemePicker() {
+    const picker = document.getElementById("theme-picker");
+    if (!picker) return;
+
+    // Read saved theme
+    const saved = localStorage.getItem("activeTheme") || "default";
+
+    // Apply saved theme
+    activateTheme(saved);
+
+    // Click handlers
+    picker.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest(".tp-btn") as HTMLElement;
+      if (!btn) return;
+      const key = btn.dataset.themeKey;
+      if (key) activateTheme(key);
+    });
+  }
+
+  initThemePicker();
+  document.addEventListener("astro:after-swap", initThemePicker);
+</script>

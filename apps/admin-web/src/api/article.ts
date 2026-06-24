@@ -13,6 +13,7 @@ export interface ArticleDraft {
   pinned: boolean;
   comment_enabled: boolean;
   toc_enabled: boolean;
+  ai_summary?: string;
   word_count?: number;
   published_at?: string;
   updated_at?: string;

@@ -107,17 +107,46 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 		fmt.Printf("⚠ SVG file uploaded: %s — ensure SVG does not contain scripts\n", originalName)
 	}
 
-	// === 6. Generate safe filename ===
+	// === 6. Determine category and save path ===
 	now := time.Now()
-	yearMonth := now.Format("2006/01")
+	var uploadsDir string
+	var urlPrefix string
+
+	category := strings.ToLower(c.PostForm("category"))
+	if category == "" {
+		category = strings.ToLower(c.PostForm("type")) // backward compat
+	}
+	if category == "" {
+		category = "common"
+	}
+	// Validate category
+	validCategories := map[string]bool{"backgrounds": true, "articles": true, "avatars": true, "common": true, "background": true}
+	if !validCategories[category] {
+		category = "common"
+	}
+	// Normalize "background" -> "backgrounds"
+	if category == "background" {
+		category = "backgrounds"
+	}
+
+	// Background-specific restrictions
+	if category == "backgrounds" && (ext == ".gif" || ext == ".svg") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "背景图不支持 gif 和 svg 格式，请使用 jpg/png/webp"})
+		return
+	}
+
+	// === 7. Generate safe filename ===
 	file.Seek(0, 0)
 	hash := sha256.New()
 	io.Copy(hash, file)
 	fileHash := fmt.Sprintf("%x", hash.Sum(nil))[:16]
 	newFilename := fmt.Sprintf("%s_%s%s", now.Format("20060102_150405"), fileHash, ext)
 
-	// === 7. Save to uploads directory ===
-	uploadsDir := filepath.Join(h.BlogRoot, "apps", "blog-web", "public", "uploads", yearMonth)
+	yearMonth := now.Format("2006/01")
+	uploadsDir = filepath.Join(h.BlogRoot, "apps", "blog-web", "public", "uploads", category, yearMonth)
+	urlPrefix = "/uploads/" + category + "/" + yearMonth
+
+	// === 8. Save to uploads directory ===
 	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建上传目录失败"})
 		return
@@ -145,13 +174,14 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	// === 8. Record in database ===
-	url := fmt.Sprintf("/uploads/%s/%s", yearMonth, newFilename)
+	// === 9. Record in database ===
+	url := fmt.Sprintf("%s/%s", urlPrefix, newFilename)
 	upload := models.UploadFile{
 		Filename:     newFilename,
 		OriginalName: originalName,
 		Path:         dstPath,
 		URL:          url,
+		Category:     category,
 		MimeType:     expectedMime,
 		Size:         header.Size,
 		Hash:         fileHash,
@@ -170,11 +200,23 @@ func (h *UploadHandler) ListUploads(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	offset := (page - 1) * pageSize
 
+	query := database.DB.Model(&models.UploadFile{})
+
+	// Filter by category
+	if cat := c.Query("category"); cat != "" {
+		query = query.Where("category = ?", cat)
+	}
+
+	// Search by filename
+	if search := c.Query("search"); search != "" {
+		query = query.Where("original_name LIKE ? OR filename LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
 	var total int64
-	database.DB.Model(&models.UploadFile{}).Count(&total)
+	query.Count(&total)
 
 	var uploads []models.UploadFile
-	if err := database.DB.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&uploads).Error; err != nil {
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&uploads).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询文件失败"})
 		return
 	}
@@ -207,6 +249,53 @@ func (h *UploadHandler) DeleteUpload(c *gin.Context) {
 
 	database.DB.Delete(&upload)
 	c.JSON(http.StatusOK, gin.H{"message": "文件已删除"})
+}
+
+// SetBackground sets an uploaded image as the site background
+func (h *UploadHandler) SetBackground(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的文件ID"})
+		return
+	}
+
+	var upload models.UploadFile
+	if err := database.DB.First(&upload, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "文件不存在"})
+		return
+	}
+
+	// Only image types
+	if !strings.HasPrefix(upload.MimeType, "image/") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "只能将图片设置为背景图"})
+		return
+	}
+
+	// Update settings
+	updates := map[string]string{
+		"site_background_enabled": "true",
+		"site_background_image":   upload.URL,
+		"site_background_opacity": "0.18",
+		"site_background_mode":    "cover",
+	}
+
+	for key, value := range updates {
+		var setting models.SiteSetting
+		result := database.DB.Where("setting_key = ?", key).First(&setting)
+		if result.Error != nil {
+			setting = models.SiteSetting{SettingKey: key, SettingValue: value}
+			database.DB.Create(&setting)
+		} else {
+			setting.SettingValue = value
+			database.DB.Save(&setting)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":           "已设置为前台背景图",
+		"background_image":  upload.URL,
+		"hint":              "刷新前台页面即可生效，无需重新构建",
+	})
 }
 
 func compareBytes(a, b []byte) bool {

@@ -19,8 +19,12 @@
           <el-icon><Document /></el-icon>
           <span>文章管理</span>
         </el-menu-item>
-        <el-menu-item index="/uploads">
+        <el-menu-item index="/images">
           <el-icon><PictureFilled /></el-icon>
+          <span>图床管理</span>
+        </el-menu-item>
+        <el-menu-item index="/uploads">
+          <el-icon><FolderOpened /></el-icon>
           <span>文件上传</span>
         </el-menu-item>
         <el-menu-item index="/settings">
@@ -62,6 +66,7 @@ import {
   DataAnalysis,
   Document,
   PictureFilled,
+  FolderOpened,
   Setting,
   UploadFilled,
   SwitchButton,

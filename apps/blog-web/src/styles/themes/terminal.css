@@ -1,2 +1,19 @@
-/* Terminal Theme — Phase 3 placeholder.
-   Will be activated via theme.config.ts preset system. */
+/* Terminal Theme — Green on black, monospace, no frills */
+
+[data-theme="terminal"] {
+  --color-bg: #0c0c0c;
+  --color-bg-soft: #161616;
+  --color-text: #22c55e;
+  --color-text-muted: #166534;
+  --color-primary: #22c55e;
+  --color-primary-hover: #4ade80;
+  --color-card: #161616;
+  --color-border: #22c55e;
+  --font-body: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  --font-code: "JetBrains Mono", "Fira Code", monospace;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --shadow-card: none;
+  --shadow-card-hover: none;
+}

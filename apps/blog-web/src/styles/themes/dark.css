@@ -1,2 +1,19 @@
-/* Dark Theme — values are already in [data-theme="dark"] of variables.css.
-   This file is a placeholder for theme preset overrides (Phase 3). */
+/* Dark Theme — Purple accent, dark backgrounds */
+
+[data-theme="dark"] {
+  --color-bg: #020617;
+  --color-bg-soft: #0f172a;
+  --color-text: #e5e7eb;
+  --color-text-muted: #94a3b8;
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #a78bfa;
+  --color-card: #111827;
+  --color-border: #1f2937;
+  --font-body: system-ui, -apple-system, "Noto Sans SC", sans-serif;
+  --font-code: "JetBrains Mono", "Fira Code", monospace;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-card-hover: 0 20px 40px rgba(0, 0, 0, 0.45);
+}

@@ -1,0 +1,310 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import ClassicHome from "@layouts/home/ClassicHome.astro";
+import FeatureHost from "@features/FeatureHost.astro";
+import { getPublishedPosts, getCategories, getTags } from "@utils/post";
+import { getCollection } from "astro:content";
+
+const allPosts = await getCollection("posts");
+const publishedPosts = getPublishedPosts(allPosts);
+
+const pinnedPosts = publishedPosts.filter((p) => p.data.pinned);
+const latestPosts = publishedPosts
+  .filter((p) => !p.data.pinned)
+  .slice(0, 6);
+
+const categories = getCategories(allPosts);
+const tags = getTags(allPosts);
+---
+
+<BaseLayout>
+  <div class="container-wide">
+    <ClassicHome pinnedPosts={pinnedPosts} latestPosts={latestPosts} />
+
+    <!-- Two-column layout: main content + sidebar -->
+    <div class="home-body">
+      <div class="home-main">
+        <!-- Categories -->
+        <section class="home-section">
+          <h2 class="section-title">分类</h2>
+          <div class="category-grid">
+            {[...categories.entries()].map(([cat, count]) => (
+              <a href={`/categories/${cat}`} class="category-card">
+                <span class="category-name">{cat}</span>
+                <span class="category-count">{count} 篇</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <!-- Tag Cloud -->
+        {tags.size > 0 && (
+          <section class="home-section">
+            <h2 class="section-title">标签</h2>
+            <div class="tag-cloud">
+              {[...tags.entries()].map(([tag, count]) => (
+                <a href={`/tags/${tag}`} class="tag-cloud-item">
+                  {tag} <span class="tag-cloud-count">({count})</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- View all link -->
+        {publishedPosts.length > 6 && (
+          <div class="view-all">
+            <a href="/archives" class="view-all-link">
+              查看全部 {publishedPosts.length} 篇文章 →
+            </a>
+          </div>
+        )}
+      </div>
+
+      <!-- Sidebar: Features -->
+      <aside class="home-sidebar">
+        <FeatureHost position="home-sidebar" />
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .home-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+  }
+
+  .home-main {
+    min-width: 0;
+  }
+
+  .home-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+
+  .home-section {
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .category-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .category-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-card);
+  }
+
+  .category-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .category-count {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+
+  .tag-cloud-item {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .tag-cloud-item:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .tag-cloud-count {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .view-all {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .view-all-link {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .view-all-link:hover {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .home-body {
+      grid-template-columns: 1fr;
+    }
+
+    .home-sidebar {
+      position: static;
+      order: -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .category-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+
+<!-- Layout variant overrides — global scope (targets <html data-home-layout>) -->
+<style is:global>
+  /* ===== MINIMAL Layout ===== */
+  [data-home-layout="minimal"] .home-banner {
+    background: transparent;
+    padding: 2rem 1.5rem 1rem;
+  }
+  [data-home-layout="minimal"] .banner-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+  [data-home-layout="minimal"] .post-card {
+    box-shadow: none;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    padding: 0 0 1.25rem 0;
+    background: transparent;
+  }
+  [data-home-layout="minimal"] .post-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  [data-home-layout="minimal"] .post-card-body {
+    padding: 0;
+  }
+  [data-home-layout="minimal"] .post-grid {
+    display: block;
+  }
+  [data-home-layout="minimal"] .section-title {
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.8125rem;
+  }
+
+  /* ===== MAGAZINE Layout ===== */
+  [data-home-layout="magazine"] .home-banner {
+    background: linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 60%, #000) 100%);
+    color: #fff;
+    padding: 5rem 1.5rem;
+  }
+  [data-home-layout="magazine"] .banner-title,
+  [data-home-layout="magazine"] .banner-subtitle {
+    color: #fff;
+  }
+  [data-home-layout="magazine"] .post-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  [data-home-layout="magazine"] .post-grid > .post-card:first-child {
+    grid-column: 1 / -1;
+  }
+  [data-home-layout="magazine"] .post-grid > .post-card:first-child .post-card-title {
+    font-size: 1.75rem;
+  }
+  [data-home-layout="magazine"] .section-title {
+    border: none;
+    text-align: center;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+  }
+
+  /* ===== TERMINAL Layout ===== */
+  [data-home-layout="terminal"] .home-banner {
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    padding: 2rem;
+  }
+  [data-home-layout="terminal"] .banner-title::before {
+    content: "> ";
+    color: var(--color-primary);
+  }
+  [data-home-layout="terminal"] .post-card {
+    box-shadow: none;
+    border: 1px solid var(--color-border);
+    border-radius: 0;
+    background: transparent;
+  }
+  [data-home-layout="terminal"] .post-card-title a::before {
+    content: "$ cat ";
+    color: var(--color-primary);
+    font-weight: 400;
+  }
+  [data-home-layout="terminal"] .post-grid {
+    display: block;
+  }
+  [data-home-layout="terminal"] .section-title {
+    border-bottom: 1px dashed var(--color-primary);
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8125rem;
+  }
+  [data-home-layout="terminal"] .section-title::before {
+    content: "### ";
+  }
+
+  /* ===== Responsive fixes for magazine/terminal ===== */
+  @media (max-width: 768px) {
+    [data-home-layout="magazine"] .post-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,4 +1,8 @@
 @import "./variables.css";
+@import "./themes/default.css";
+@import "./themes/dark.css";
+@import "./themes/minimal.css";
+@import "./themes/terminal.css";
 @import "tailwindcss";
 
 *,

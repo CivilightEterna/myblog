@@ -46,6 +46,11 @@ const router = createRouter({
           component: () => import("@/views/Settings.vue"),
         },
         {
+          path: "images",
+          name: "ImageManager",
+          component: () => import("@/views/ImageManager.vue"),
+        },
+        {
           path: "builds",
           name: "BuildManager",
           component: () => import("@/views/BuildManager.vue"),

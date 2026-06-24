@@ -59,6 +59,39 @@
               <el-checkbox v-model="form.toc_enabled">显示目录</el-checkbox>
               <el-checkbox v-model="form.comment_enabled">允许评论</el-checkbox>
             </el-form-item>
+
+            <el-divider />
+
+            <!-- AI Summary -->
+            <el-form-item label="AI 摘要">
+              <el-input
+                v-model="form.ai_summary"
+                type="textarea"
+                :rows="5"
+                placeholder="点击下方按钮生成 AI 摘要，或手动输入..."
+              />
+              <div class="ai-actions">
+                <el-button
+                  type="primary"
+                  size="small"
+                  :loading="aiLoading"
+                  :disabled="isNew"
+                  @click="generateAiSummary"
+                >
+                  {{ form.ai_summary ? "重新生成摘要" : "AI 生成摘要" }}
+                </el-button>
+                <el-button
+                  v-if="form.ai_summary"
+                  size="small"
+                  type="danger"
+                  plain
+                  @click="form.ai_summary = ''"
+                >
+                  清空摘要
+                </el-button>
+                <span v-if="isNew" class="ai-hint">请先保存草稿后再生成摘要</span>
+              </div>
+            </el-form-item>
           </el-form>
         </el-card>
       </el-col>
@@ -84,6 +117,7 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getArticle, createArticle, updateArticle, publishArticle } from "@/api/article";
+import client from "@/api/client";
 import type { ArticleDraft } from "@/api/article";
 import { ArrowLeft } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
@@ -93,6 +127,28 @@ const router = useRouter();
 
 const isNew = computed(() => !route.params.id);
 
+const aiLoading = ref(false);
+
+async function generateAiSummary() {
+  if (isNew.value) {
+    ElMessage.warning("请先保存草稿后再生成摘要");
+    return;
+  }
+  const id = Number(route.params.id);
+  if (!id) return;
+
+  aiLoading.value = true;
+  try {
+    const res = await client.post(`/articles/${id}/ai-summary`);
+    form.ai_summary = res.data.ai_summary;
+    ElMessage.success("AI 摘要已生成");
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.error || "生成失败");
+  } finally {
+    aiLoading.value = false;
+  }
+}
+
 const form = reactive<ArticleDraft>({
   title: "",
   slug: "",
@@ -101,6 +157,7 @@ const form = reactive<ArticleDraft>({
   cover: "",
   category: "",
   tags: [],
+  ai_summary: "",
   draft: true,
   pinned: false,
   comment_enabled: true,
@@ -186,6 +243,7 @@ onMounted(async () => {
       form.pinned = data.pinned;
       form.toc_enabled = data.toc_enabled;
       form.comment_enabled = data.comment_enabled;
+      form.ai_summary = data.ai_summary || "";
     } catch (e: any) {
       ElMessage.error("加载文章失败");
       router.push("/articles");
@@ -287,5 +345,16 @@ onMounted(async () => {
   .editor-wrapper {
     grid-template-columns: 1fr;
   }
+}
+
+.ai-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.ai-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
 }
 </style>

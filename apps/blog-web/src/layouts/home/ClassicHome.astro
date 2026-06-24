@@ -15,8 +15,11 @@ const { pinnedPosts, latestPosts } = Astro.props;
   <!-- Banner -->
   <div class="home-banner">
     <div class="home-banner-content">
-      <h1 class="banner-title">InkSpace</h1>
-      <p class="banner-subtitle">一个安静写作的地方</p>
+      <div class="banner-avatar" id="bannerAvatarWrap" style="display:none">
+        <img id="bannerAvatarImg" src="" alt="" />
+      </div>
+      <h1 class="banner-title" id="bannerTitle">InkSpace</h1>
+      <p class="banner-subtitle" id="bannerSubtitle">一个安静写作的地方</p>
       <div class="banner-search">
         <SearchBox />
       </div>
@@ -124,6 +127,9 @@ const { pinnedPosts, latestPosts } = Astro.props;
     border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
   }
 
+  .banner-avatar { display: flex; justify-content: center; margin-bottom: 1rem; }
+  .banner-avatar img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--color-border); box-shadow: var(--shadow-card); }
+
   @media (max-width: 640px) {
     .home-banner {
       padding: 2.5rem 1rem 2rem;
@@ -138,3 +144,20 @@ const { pinnedPosts, latestPosts } = Astro.props;
     }
   }
 </style>
+
+<script>
+  (async function loadSiteInfo(){
+    try {
+      const r = await fetch('/api/public/site-config');
+      if (!r.ok) return;
+      const cfg = await r.json();
+      if (cfg.site_name) document.getElementById('bannerTitle').textContent = cfg.site_name;
+      if (cfg.site_description) document.getElementById('bannerSubtitle').textContent = cfg.site_description;
+      var avatar = cfg.site_logo || cfg.site_avatar || '';
+      if (avatar) {
+        var wrap = document.getElementById('bannerAvatarWrap');
+        if (wrap) { wrap.style.display = 'flex'; document.getElementById('bannerAvatarImg').src = avatar; }
+      }
+    } catch(e){ /* use fallback text */ }
+  })();
+</script>
