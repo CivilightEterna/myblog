@@ -1,0 +1,140 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+
+const title = "关于";
+---
+
+<PageLayout title={title}>
+  <div class="about">
+    <h1 class="about-title">{title}</h1>
+
+    <div class="about-content">
+      <div class="about-avatar">
+        <div class="avatar-placeholder">
+          👤
+        </div>
+      </div>
+
+      <h2>你好，我是 Blog Author</h2>
+
+      <p>
+        这是一位热爱技术的开发者，在这里记录学习过程中的思考和总结。
+      </p>
+
+      <p>
+        博客使用 Astro 构建，文章以 Markdown 格式保存，通过 Nginx 托管静态页面。
+      </p>
+
+      <h3>关于本博客</h3>
+
+      <p>
+        本博客是一个长期维护的个人内容系统，致力于：
+      </p>
+
+      <ul>
+        <li>持续记录技术学习心得</li>
+        <li>沉淀可复用的技术经验</li>
+        <li>保持内容所有权和迁移自由</li>
+        <li>最小化依赖，长期可维护</li>
+      </ul>
+
+      <h3>联系方式</h3>
+
+      <div class="about-links">
+        <a href="https://github.com/your-username" class="about-link" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+        <a href="mailto:author@example.com" class="about-link">
+          Email
+        </a>
+        <a href="/rss.xml" class="about-link">
+          RSS
+        </a>
+      </div>
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .about {
+    max-width: var(--max-width-content);
+    margin: 0 auto;
+  }
+
+  .about-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    color: var(--color-text);
+  }
+
+  .about-content {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--color-text);
+  }
+
+  .about-content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .about-content h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .about-content h3 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .about-content ul {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .about-content li {
+    margin-bottom: 0.375rem;
+  }
+
+  .about-avatar {
+    margin-bottom: 1.5rem;
+  }
+
+  .avatar-placeholder {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--color-bg-soft);
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+  }
+
+  .about-links {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .about-link {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .about-link:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+/**
+ * Table of Contents for Markdown posts.
+ * Extracts headings from the rendered content.
+ */
+export interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+export interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter to h2 and h3 only for practical TOC
+const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{tocHeadings.length > 0 && (
+  <nav class="toc" aria-label="目录">
+    <h2 class="toc-title">目录</h2>
+    <ul class="toc-list">
+      {tocHeadings.map((heading) => (
+        <li
+          class={`toc-item toc-item--depth-${heading.depth}`}
+        >
+          <a href={`#${heading.slug}`} class="toc-link">
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .toc {
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .toc-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-item {
+    margin-bottom: 0.375rem;
+  }
+
+  .toc-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .toc-item--depth-3 {
+    padding-left: 1.25rem;
+  }
+
+  .toc-link {
+    display: block;
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    border-left: 2px solid transparent;
+    padding-left: 0.75rem;
+  }
+
+  .toc-link:hover {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+  }
+</style>

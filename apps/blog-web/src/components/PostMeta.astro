@@ -1,0 +1,80 @@
+---
+import Icon from "./Icon.astro";
+import { formatDate } from "@utils/date";
+import { formatReadingTime, estimateReadingTime } from "@utils/reading-time";
+
+export interface Props {
+  date: string;
+  updated?: string;
+  category?: string;
+  tags?: string[];
+  readingTime?: string;
+  rawContent?: string;
+}
+
+const { date, updated, category, tags = [], readingTime, rawContent } = Astro.props;
+const displayTime = readingTime || (rawContent ? formatReadingTime(rawContent) : null);
+---
+
+<div class="post-meta">
+  <span class="meta-item">
+    <Icon name="calendar" size={16} />
+    <time datetime={date}>{formatDate(date)}</time>
+  </span>
+
+  {updated && updated !== date && (
+    <span class="meta-item meta-updated">
+      <span class="meta-label">更新于</span>
+      <time datetime={updated}>{formatDate(updated)}</time>
+    </span>
+  )}
+
+  {displayTime && (
+    <span class="meta-item">
+      <Icon name="clock" size={16} />
+      <span>{displayTime}</span>
+    </span>
+  )}
+
+  {category && (
+    <span class="meta-item">
+      <Icon name="folder" size={16} />
+      <a href={`/categories/${category}`} class="meta-link">{category}</a>
+    </span>
+  )}
+</div>
+
+<style>
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .meta-label {
+    margin-right: 0.125rem;
+  }
+
+  .meta-updated {
+    font-style: italic;
+  }
+
+  .meta-link {
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .meta-link:hover {
+    color: var(--color-primary);
+  }
+</style>

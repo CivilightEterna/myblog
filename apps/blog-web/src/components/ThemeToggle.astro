@@ -1,0 +1,78 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<button
+  id="theme-toggle"
+  class="theme-toggle"
+  aria-label="切换主题"
+  type="button"
+>
+  <span class="icon-sun">
+    <Icon name="sun" size={18} />
+  </span>
+  <span class="icon-moon">
+    <Icon name="moon" size={18} />
+  </span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  [data-theme="dark"] .icon-sun {
+    display: none;
+  }
+
+  [data-theme="light"] .icon-moon,
+  :root:not([data-theme="dark"]) .icon-moon {
+    display: none;
+  }
+
+  [data-theme="dark"] .icon-moon {
+    display: flex;
+  }
+</style>
+
+<script>
+  function initTheme() {
+    const toggle = document.getElementById("theme-toggle");
+    if (!toggle) return;
+
+    // Set initial theme
+    const saved = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (saved === "dark" || (!saved && prefersDark)) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+
+    toggle.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+  }
+
+  initTheme();
+  document.addEventListener("astro:after-swap", initTheme);
+</script>

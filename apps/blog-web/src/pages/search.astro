@@ -1,0 +1,72 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import SearchBox from "@components/SearchBox.astro";
+
+const title = "搜索";
+const description = "搜索博客中的文章。搜索功能将在后续版本中通过 Pagefind 实现。";
+---
+
+<PageLayout title={title} description={description}>
+  <div class="search-page">
+    <h1 class="search-title">{title}</h1>
+    <p class="search-desc">{description}</p>
+
+    <div class="search-wrapper">
+      <SearchBox />
+    </div>
+
+    <div class="search-placeholder">
+      <p class="placeholder-text">
+        搜索功能将在后续版本中通过 Pagefind 实现。
+      </p>
+      <p class="placeholder-hint">
+        当前您可以通过 <a href="/categories">分类</a>、<a href="/tags">标签</a> 和 <a href="/archives">归档</a> 浏览文章。
+      </p>
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .search-page {
+    max-width: var(--max-width-content);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .search-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .search-desc {
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .search-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+  }
+
+  .search-placeholder {
+    padding: 3rem 1.5rem;
+    background: var(--color-bg-soft);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .placeholder-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+  }
+
+  .placeholder-hint {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+</style>

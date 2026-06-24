@@ -1,0 +1,88 @@
+---
+import { getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import PostCard from "@components/PostCard.astro";
+import { getPublishedPosts, getPostsByCategory, getCategories } from "@utils/post";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  const categories = getCategories(posts);
+  return [...categories.keys()].map((category) => ({
+    params: { category },
+  }));
+}
+
+const { category } = Astro.params;
+const allPosts = await getCollection("posts");
+const categoryPosts = getPostsByCategory(allPosts, category!);
+
+const title = `分类：${category}`;
+const description = `共有 ${categoryPosts.length} 篇关于 "${category}" 的文章`;
+---
+
+<PageLayout title={title} description={description}>
+  <h1 class="page-title">{title}</h1>
+  <p class="page-desc">{description}</p>
+
+  {categoryPosts.length === 0 ? (
+    <div class="empty-state">
+      <p>该分类下暂无文章。</p>
+      <a href="/" class="back-link">← 回到首页</a>
+    </div>
+  ) : (
+    <div class="post-grid">
+      {categoryPosts.map((post) => (
+        <PostCard
+          title={post.data.title}
+          slug={post.slug}
+          description={post.data.description}
+          date={post.data.date}
+          updated={post.data.updated}
+          category={post.data.category}
+          tags={post.data.tags}
+          cover={post.data.cover}
+          pinned={post.data.pinned}
+        />
+      ))}
+    </div>
+  )}
+</PageLayout>
+
+<style>
+  .page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .page-desc {
+    color: var(--color-text-muted);
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+  }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    color: var(--color-text-muted);
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 1rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 640px) {
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

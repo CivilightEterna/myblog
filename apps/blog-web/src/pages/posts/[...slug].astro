@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import PostLayout from "@layouts/PostLayout.astro";
+import { getPublishedPosts, getPrevNext } from "@utils/post";
+import type { Heading } from "@components/Toc.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return getPublishedPosts(posts).map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const allPosts = await getCollection("posts");
+const { prev, next } = getPrevNext(allPosts, post.slug);
+
+// Extract headings from rendered content
+const { headings } = await post.render();
+---
+
+<PostLayout
+  post={post}
+  prev={prev}
+  next={next}
+  headings={headings as Heading[]}
+/>

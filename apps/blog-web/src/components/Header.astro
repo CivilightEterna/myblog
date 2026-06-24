@@ -1,0 +1,177 @@
+---
+import ThemeToggle from "./ThemeToggle.astro";
+import Icon from "./Icon.astro";
+import { siteConfig } from "@config/site.config";
+
+const { nav } = siteConfig;
+---
+
+<header class="site-header">
+  <div class="container-wide header-inner">
+    <a href="/" class="site-logo">
+      {siteConfig.title}
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      {
+        nav.map((item) => (
+          <a href={item.href} class="nav-link">
+            {item.label}
+          </a>
+        ))
+      }
+      <a href="/rss.xml" class="nav-link nav-icon" aria-label="RSS" title="RSS 订阅">
+        <Icon name="rss" size={18} />
+      </a>
+      <ThemeToggle />
+    </nav>
+
+    <!-- Mobile menu button -->
+    <button
+      id="mobile-menu-btn"
+      class="mobile-menu-btn"
+      aria-label="菜单"
+      type="button"
+    >
+      <span class="menu-bar"></span>
+      <span class="menu-bar"></span>
+      <span class="menu-bar"></span>
+    </button>
+  </div>
+
+  <!-- Mobile nav -->
+  <div id="mobile-nav" class="mobile-nav hidden">
+    {
+      nav.map((item) => (
+        <a href={item.href} class="mobile-nav-link">
+          {item.label}
+        </a>
+      ))
+    }
+    <a href="/rss.xml" class="mobile-nav-link">RSS</a>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .site-logo {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+  }
+
+  .site-logo:hover {
+    color: var(--color-primary);
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+
+  .nav-icon {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .menu-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-nav {
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .mobile-nav.hidden {
+    display: none;
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 0.75rem 0;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobile-nav-link:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    .site-nav {
+      display: none;
+    }
+
+    .mobile-menu-btn {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  function initMobileMenu() {
+    const btn = document.getElementById("mobile-menu-btn");
+    const nav = document.getElementById("mobile-nav");
+    if (!btn || !nav) return;
+
+    btn.addEventListener("click", () => {
+      nav.classList.toggle("hidden");
+    });
+  }
+
+  initMobileMenu();
+  document.addEventListener("astro:after-swap", initMobileMenu);
+</script>

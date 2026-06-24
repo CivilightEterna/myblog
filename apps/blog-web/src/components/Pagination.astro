@@ -1,0 +1,99 @@
+---
+import Icon from "./Icon.astro";
+
+export interface Props {
+  prev: { title: string; slug: string } | null;
+  next: { title: string; slug: string } | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav class="pagination" aria-label="文章导航">
+  <div class="pagination-item pagination-prev">
+    {prev && (
+      <a href={`/posts/${prev.slug}`} class="pagination-link">
+        <Icon name="chevron-left" size={16} />
+        <div>
+          <span class="pagination-label">上一篇</span>
+          <span class="pagination-title">{prev.title}</span>
+        </div>
+      </a>
+    )}
+  </div>
+
+  <div class="pagination-item pagination-next">
+    {next && (
+      <a href={`/posts/${next.slug}`} class="pagination-link pagination-link--next">
+        <div>
+          <span class="pagination-label">下一篇</span>
+          <span class="pagination-title">{next.title}</span>
+        </div>
+        <Icon name="chevron-right" size={16} />
+      </a>
+    )}
+  </div>
+</nav>
+
+<style>
+  .pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pagination-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    transition: all 0.2s ease;
+  }
+
+  .pagination-link:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-card);
+  }
+
+  .pagination-link--next {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .pagination-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .pagination-title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .pagination {
+      grid-template-columns: 1fr;
+    }
+
+    .pagination-next {
+      text-align: left;
+    }
+
+    .pagination-link--next {
+      justify-content: flex-start;
+    }
+  }
+</style>

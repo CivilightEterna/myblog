@@ -1,0 +1,140 @@
+---
+import PostCard from "@components/PostCard.astro";
+import SearchBox from "@components/SearchBox.astro";
+import type { CollectionEntry } from "astro:content";
+
+export interface Props {
+  pinnedPosts: CollectionEntry<"posts">[];
+  latestPosts: CollectionEntry<"posts">[];
+}
+
+const { pinnedPosts, latestPosts } = Astro.props;
+---
+
+<section class="home">
+  <!-- Banner -->
+  <div class="home-banner">
+    <div class="home-banner-content">
+      <h1 class="banner-title">InkSpace</h1>
+      <p class="banner-subtitle">一个安静写作的地方</p>
+      <div class="banner-search">
+        <SearchBox />
+      </div>
+    </div>
+  </div>
+
+  <!-- Pinned Posts -->
+  {pinnedPosts.length > 0 && (
+    <section class="home-section">
+      <h2 class="section-title">置顶</h2>
+      <div class="post-grid post-grid--pinned">
+        {pinnedPosts.map((post) => (
+          <PostCard
+            title={post.data.title}
+            slug={post.slug}
+            description={post.data.description}
+            date={post.data.date}
+            updated={post.data.updated}
+            category={post.data.category}
+            tags={post.data.tags}
+            cover={post.data.cover}
+            pinned={post.data.pinned}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Latest Posts -->
+  {latestPosts.length > 0 && (
+    <section class="home-section">
+      <h2 class="section-title">最新文章</h2>
+      <div class="post-grid">
+        {latestPosts.map((post) => (
+          <PostCard
+            title={post.data.title}
+            slug={post.slug}
+            description={post.data.description}
+            date={post.data.date}
+            updated={post.data.updated}
+            category={post.data.category}
+            tags={post.data.tags}
+            cover={post.data.cover}
+            pinned={post.data.pinned}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+</section>
+
+<style>
+  .home-banner {
+    text-align: center;
+    padding: 4rem 1.5rem 3rem;
+    background: var(--color-bg-soft);
+    border-radius: var(--radius-lg);
+    margin-bottom: 3rem;
+  }
+
+  .home-banner-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .banner-title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .banner-subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .banner-search {
+    display: flex;
+    justify-content: center;
+  }
+
+  .home-section {
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .post-grid--pinned .post-card {
+    border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  }
+
+  @media (max-width: 640px) {
+    .home-banner {
+      padding: 2.5rem 1rem 2rem;
+    }
+
+    .banner-title {
+      font-size: 2rem;
+    }
+
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

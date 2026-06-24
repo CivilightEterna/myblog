@@ -1,0 +1,68 @@
+---
+import { siteConfig } from "@config/site.config";
+import Icon from "./Icon.astro";
+
+const { footer, social } = siteConfig;
+---
+
+<footer class="site-footer">
+  <div class="container-wide footer-inner">
+    <div class="footer-left">
+      <p class="footer-text">&copy; {footer.since} — {new Date().getFullYear()} {footer.text}</p>
+    </div>
+    <div class="footer-right">
+      {social.github && (
+        <a href={social.github} class="social-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <Icon name="github" size={20} />
+        </a>
+      )}
+      <a href="/rss.xml" class="social-link" aria-label="RSS">
+        <Icon name="rss" size={20} />
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    background: var(--color-bg-soft);
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-text {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    transition: all 0.2s ease;
+  }
+
+  .social-link:hover {
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  }
+</style>

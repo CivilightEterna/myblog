@@ -1,0 +1,158 @@
+---
+import { getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import { getPublishedPosts } from "@utils/post";
+import { formatDate, groupByYearMonth } from "@utils/date";
+
+const allPosts = await getCollection("posts");
+const posts = getPublishedPosts(allPosts);
+const grouped = groupByYearMonth(posts, (p) => p.data.date);
+
+const title = "归档";
+const description = `共 ${posts.length} 篇文章`;
+---
+
+<PageLayout title={title} description={description}>
+  <h1 class="page-title">{title}</h1>
+  <p class="page-desc">{description}</p>
+
+  {posts.length === 0 ? (
+    <div class="empty-state">
+      <p>暂无文章。</p>
+    </div>
+  ) : (
+    <div class="archives">
+      {[...grouped.entries()]
+        .sort(([a], [b]) => b - a) // Years descending
+        .map(([year, months]) => (
+          <section class="archive-year">
+            <h2 class="archive-year-title">{year} 年</h2>
+            {[...months.entries()]
+              .sort(([a], [b]) => b - a) // Months descending
+              .map(([month, monthPosts]) => (
+                <section class="archive-month">
+                  <h3 class="archive-month-title">
+                    {year} 年 {String(month).padStart(2, "0")} 月
+                    <span class="archive-count">{monthPosts.length} 篇</span>
+                  </h3>
+                  <ul class="archive-list">
+                    {monthPosts.map((post) => (
+                      <li class="archive-item">
+                        <a href={`/posts/${post.slug}`} class="archive-link">
+                          <time class="archive-date" datetime={post.data.date}>
+                            {formatDate(post.data.date)}
+                          </time>
+                          <span class="archive-title">{post.data.title}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+          </section>
+        ))}
+    </div>
+  )}
+</PageLayout>
+
+<style>
+  .page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .page-desc {
+    color: var(--color-text-muted);
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    color: var(--color-text-muted);
+  }
+
+  .archive-year {
+    margin-bottom: 2.5rem;
+  }
+
+  .archive-year-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .archive-month {
+    margin-bottom: 1.5rem;
+  }
+
+  .archive-month-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .archive-count {
+    font-weight: 400;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+  }
+
+  .archive-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .archive-item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .archive-item:last-child {
+    border-bottom: none;
+  }
+
+  .archive-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    text-decoration: none;
+    transition: padding 0.2s ease;
+  }
+
+  .archive-link:hover {
+    padding-left: 0.5rem;
+  }
+
+  .archive-date {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    min-width: 100px;
+  }
+
+  .archive-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .archive-link:hover .archive-title {
+    color: var(--color-primary);
+  }
+
+  @media (max-width: 640px) {
+    .archive-link {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+  }
+</style>

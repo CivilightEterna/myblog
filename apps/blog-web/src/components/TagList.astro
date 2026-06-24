@@ -1,0 +1,52 @@
+---
+export interface Props {
+  tags: string[];
+  limit?: number;
+}
+
+const { tags, limit } = Astro.props;
+const displayTags = limit ? tags.slice(0, limit) : tags;
+---
+
+<div class="tag-list">
+  {displayTags.map((tag) => (
+    <a href={`/tags/${tag}`} class="tag-badge">{tag}</a>
+  ))}
+  {limit && tags.length > limit && (
+    <span class="tag-more">+{tags.length - limit}</span>
+  )}
+</div>
+
+<style>
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-badge {
+    display: inline-block;
+    padding: 0.2rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    transition: all 0.2s ease;
+  }
+
+  .tag-badge:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+
+  .tag-more {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.625rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+</style>

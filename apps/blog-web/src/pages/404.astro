@@ -1,0 +1,67 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+
+const title = "404 — 页面未找到";
+---
+
+<BaseLayout title={title}>
+  <div class="not-found">
+    <h1 class="nf-code">404</h1>
+    <p class="nf-title">页面未找到</p>
+    <p class="nf-desc">你访问的页面不存在，或者已经被移动到了别的地方。</p>
+    <a href="/" class="nf-link">← 回到首页</a>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .nf-code {
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .nf-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .nf-desc {
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+    max-width: 400px;
+  }
+
+  .nf-link {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--color-primary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .nf-link:hover {
+    background: var(--color-primary-hover);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card);
+  }
+</style>

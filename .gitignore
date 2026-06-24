@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+.astro/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+storage/logs/
+
+# Runtime data (Phase 2+)
+data/
+storage/uploads/
+storage/backups/
+releases/
+current
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage/
