@@ -51,16 +51,17 @@ const pagefind = ref<any>(null);
 let debounceTimer: any = null;
 
 onMounted(async () => {
-  // Load Pagefind from the generated index
+  // Pagefind only exists after `pnpm build` (generated in dist/pagefind/)
+  // Use a variable path so Vite's static analysis skips this import.
   try {
-    const pf = await import("/pagefind/pagefind.js");
-    pf.init();
-    pagefind.value = pf;
+    const pagefindPath = "/pagefind/pagefind.js";
+    const mod = await import(/* @vite-ignore */ pagefindPath);
+    if (mod.init) await mod.init();
+    pagefind.value = mod;
   } catch (e) {
-    console.warn("Pagefind not available (run pnpm build to index)");
+    console.log("Pagefind not available (run pnpm build to enable search)");
   }
 
-  // Focus input
   nextTick(() => inputRef.value?.focus());
 });
 
