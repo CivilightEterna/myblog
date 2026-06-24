@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import ClassicHome from "@layouts/home/ClassicHome.astro";
+import FeatureHost from "@features/FeatureHost.astro";
 import { getPublishedPosts, getCategories, getTags } from "@utils/post";
 import { getCollection } from "astro:content";
 
@@ -20,45 +21,71 @@ const tags = getTags(allPosts);
   <div class="container-wide">
     <ClassicHome pinnedPosts={pinnedPosts} latestPosts={latestPosts} />
 
-    <!-- Categories -->
-    <section class="home-section">
-      <h2 class="section-title">分类</h2>
-      <div class="category-grid">
-        {[...categories.entries()].map(([cat, count]) => (
-          <a href={`/categories/${cat}`} class="category-card">
-            <span class="category-name">{cat}</span>
-            <span class="category-count">{count} 篇</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    <!-- Two-column layout: main content + sidebar -->
+    <div class="home-body">
+      <div class="home-main">
+        <!-- Categories -->
+        <section class="home-section">
+          <h2 class="section-title">分类</h2>
+          <div class="category-grid">
+            {[...categories.entries()].map(([cat, count]) => (
+              <a href={`/categories/${cat}`} class="category-card">
+                <span class="category-name">{cat}</span>
+                <span class="category-count">{count} 篇</span>
+              </a>
+            ))}
+          </div>
+        </section>
 
-    <!-- Tag Cloud -->
-    {tags.size > 0 && (
-      <section class="home-section">
-        <h2 class="section-title">标签</h2>
-        <div class="tag-cloud">
-          {[...tags.entries()].map(([tag, count]) => (
-            <a href={`/tags/${tag}`} class="tag-cloud-item">
-              {tag} <span class="tag-cloud-count">({count})</span>
+        <!-- Tag Cloud -->
+        {tags.size > 0 && (
+          <section class="home-section">
+            <h2 class="section-title">标签</h2>
+            <div class="tag-cloud">
+              {[...tags.entries()].map(([tag, count]) => (
+                <a href={`/tags/${tag}`} class="tag-cloud-item">
+                  {tag} <span class="tag-cloud-count">({count})</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- View all link -->
+        {publishedPosts.length > 6 && (
+          <div class="view-all">
+            <a href="/archives" class="view-all-link">
+              查看全部 {publishedPosts.length} 篇文章 →
             </a>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- View all link -->
-    {publishedPosts.length > 6 && (
-      <div class="view-all">
-        <a href="/archives" class="view-all-link">
-          查看全部 {publishedPosts.length} 篇文章 →
-        </a>
+          </div>
+        )}
       </div>
-    )}
+
+      <!-- Sidebar: Features -->
+      <aside class="home-sidebar">
+        <FeatureHost position="home-sidebar" />
+      </aside>
+    </div>
   </div>
 </BaseLayout>
 
 <style>
+  .home-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+  }
+
+  .home-main {
+    min-width: 0;
+  }
+
+  .home-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+
   .home-section {
     margin-bottom: 3rem;
   }
@@ -154,6 +181,17 @@ const tags = getTags(allPosts);
   .view-all-link:hover {
     background: var(--color-primary);
     color: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .home-body {
+      grid-template-columns: 1fr;
+    }
+
+    .home-sidebar {
+      position: static;
+      order: -1;
+    }
   }
 
   @media (max-width: 640px) {

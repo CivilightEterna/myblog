@@ -1,6 +1,7 @@
 ---
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
+import FeatureHost from "@features/FeatureHost.astro";
 import { siteConfig } from "@config/site.config";
 import "@/styles/global.css";
 import "@/styles/markdown.css";
@@ -60,6 +61,9 @@ const pageDesc = description || siteConfig.description;
     </main>
 
     <Footer />
+
+    <!-- Feature: global-floating (pet, music player, etc.) -->
+    <FeatureHost position="global-floating" />
 
     <!-- Back to top -->
     <button id="back-to-top" class="back-to-top hidden" aria-label="回到顶部" type="button">

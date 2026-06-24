@@ -16,8 +16,8 @@ const { post } = Astro.props;
 const allPosts = await getCollection("posts");
 const { prev, next } = getPrevNext(allPosts, post.slug);
 
-// Extract headings from rendered content
-const { headings } = await post.render();
+// render() returns Content component + headings
+const { Content, headings } = await post.render();
 ---
 
 <PostLayout
@@ -25,4 +25,6 @@ const { headings } = await post.render();
   prev={prev}
   next={next}
   headings={headings as Heading[]}
-/>
+>
+  <Content />
+</PostLayout>

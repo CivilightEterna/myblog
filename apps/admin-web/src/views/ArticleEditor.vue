@@ -107,39 +107,18 @@ const form = reactive<ArticleDraft>({
   toc_enabled: true,
 });
 
-// Simple markdown rendering for preview (basic)
-function renderMarkdown(text: string): string {
-  let html = text
-    // Headers
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    // Bold and italic
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Code blocks
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-    // Inline code
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    // Links
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
-    // Line breaks
-    .replace(/\n\n/g, '</p><p>')
-    // Wrap in paragraphs
-    .replace(/^(.+)$/gm, (_, m) => {
-      if (m.startsWith('<')) return m;
-      return m;
-    });
+import { marked } from "marked";
 
-  // Wrap non-tag lines in paragraphs
-  html = '<p>' + html + '</p>';
-  html = html.replace(/<p><(\/?(?:h[1-6]|pre|ul|ol|li|table|thead|tbody|tr|th|td|blockquote|div))/g, '<$1');
-  html = html.replace(/(\/(?:h[1-6]|pre|ul|ol|li|table|thead|tbody|tr|th|td|blockquote|div)>)<\/p>/g, '$1>');
+// Configure marked for safe rendering
+marked.setOptions({
+  breaks: true,       // Support GFM line breaks
+  gfm: true,          // GitHub Flavored Markdown
+});
 
-  return html;
-}
-
-const renderedPreview = computed(() => renderMarkdown(form.content));
+const renderedPreview = computed(() => {
+  if (!form.content) return "<p style='color:#9ca3af'>在左侧输入 Markdown，这里实时预览...</p>";
+  return marked.parse(form.content) as string;
+});
 
 function generateSlug() {
   if (!form.title) return;
@@ -277,12 +256,32 @@ onMounted(async () => {
   color: #1f2937;
 }
 
-.markdown-preview :deep(h1) { font-size: 1.75rem; margin-bottom: 1rem; }
-.markdown-preview :deep(h2) { font-size: 1.5rem; margin-bottom: 0.75rem; }
-.markdown-preview :deep(h3) { font-size: 1.25rem; margin-bottom: 0.5rem; }
-.markdown-preview :deep(pre) { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow-x: auto; }
-.markdown-preview :deep(code) { font-family: "JetBrains Mono", monospace; font-size: 0.875rem; }
-.markdown-preview :deep(p) { margin-bottom: 0.75rem; }
+.markdown-preview :deep(h1) { font-size: 1.75rem; font-weight: 700; margin: 1.5rem 0 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+.markdown-preview :deep(h2) { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.625rem; }
+.markdown-preview :deep(h3) { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+.markdown-preview :deep(h4) { font-size: 1.1rem; font-weight: 700; margin: 0.875rem 0 0.5rem; }
+.markdown-preview :deep(p) { margin-bottom: 0.75rem; line-height: 1.8; }
+.markdown-preview :deep(strong) { font-weight: 700; }
+.markdown-preview :deep(em) { font-style: italic; }
+.markdown-preview :deep(a) { color: #8b5cf6; text-decoration: underline; }
+.markdown-preview :deep(ul), .markdown-preview :deep(ol) { margin: 0.5rem 0 0.75rem 1.5rem; }
+.markdown-preview :deep(li) { margin-bottom: 0.25rem; }
+.markdown-preview :deep(blockquote) {
+  margin: 0.75rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid #8b5cf6;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.markdown-preview :deep(pre) { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 0.75rem 0; }
+.markdown-preview :deep(pre code) { background: none; padding: 0; font-size: 0.8125rem; }
+.markdown-preview :deep(code) { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 4px; font-size: 0.875rem; font-family: "JetBrains Mono", "Fira Code", monospace; }
+.markdown-preview :deep(table) { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
+.markdown-preview :deep(th) { background: #f3f4f6; font-weight: 600; padding: 0.5rem 0.75rem; border: 1px solid #e5e7eb; text-align: left; }
+.markdown-preview :deep(td) { padding: 0.5rem 0.75rem; border: 1px solid #e5e7eb; }
+.markdown-preview :deep(hr) { border: none; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
+.markdown-preview :deep(img) { max-width: 100%; border-radius: 6px; margin: 0.75rem 0; }
+.markdown-preview :deep(input[type="checkbox"]) { margin-right: 0.375rem; }
 
 @media (max-width: 1024px) {
   .editor-wrapper {

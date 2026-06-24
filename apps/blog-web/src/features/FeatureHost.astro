@@ -1,0 +1,24 @@
+---
+// FeatureHost — unified mount point for all features at a given slot.
+// To add a new feature:
+//   1. Create src/features/<name>/ (config.ts + component)
+//   2. Add import below
+//   3. Add is-<key> conditional block in template
+import { getEnabledFeatures } from "./index";
+import type { FeaturePosition } from "./index";
+
+import Heatmap from "./heatmap/Heatmap.astro";
+
+export interface Props {
+  position: FeaturePosition;
+}
+
+const { position } = Astro.props;
+const features = getEnabledFeatures(position);
+
+// Build a lookup of which features are enabled at this position
+const has = (key: string) => features.some((f) => f.key === key);
+---
+
+{has("writing-heatmap") && <Heatmap />}
+{has("live2d-pet") && null}

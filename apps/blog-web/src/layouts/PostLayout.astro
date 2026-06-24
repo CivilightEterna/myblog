@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import FeatureHost from "@features/FeatureHost.astro";
 import PostMeta from "@components/PostMeta.astro";
 import TagList from "@components/TagList.astro";
 import Toc from "@components/Toc.astro";
@@ -15,7 +16,7 @@ export interface Props {
 }
 
 const { post, prev, next, headings = [] } = Astro.props;
-const { data, body } = post;
+const { data } = post;
 const { title, description, date, updated, category, tags, cover, toc } = data;
 const showToc = toc && headings.length > 0;
 
@@ -64,13 +65,16 @@ const nextLink = next ? { title: next.data.title, slug: next.slug } : null;
 
       <div class={`post-content ${showToc ? "post-content--with-sidebar" : ""}`}>
         <div class="markdown-body">
-          {body}
+          <slot />
         </div>
       </div>
     </div>
 
     <footer class="post-footer">
       <Pagination prev={prevLink} next={nextLink} />
+
+      <!-- Feature: post-after-content (comments, etc.) -->
+      <FeatureHost position="post-after-content" />
     </footer>
   </article>
 </BaseLayout>

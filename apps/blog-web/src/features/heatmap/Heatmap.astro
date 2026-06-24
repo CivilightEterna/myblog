@@ -1,0 +1,20 @@
+---
+// Static wrapper — loads Vue island on visibility for interactivity
+import HeatmapIsland from "./HeatmapIsland.vue";
+import "./heatmap.css";
+---
+
+<section class="feature-card heatmap-card">
+  <h2 class="heatmap-title">写作热力图</h2>
+  <p class="heatmap-desc">过去一年的文章发布日历</p>
+  <div class="heatmap-legend">
+    <span class="legend-label">少</span>
+    <span class="legend-cell legend-0"></span>
+    <span class="legend-cell legend-1"></span>
+    <span class="legend-cell legend-2"></span>
+    <span class="legend-cell legend-3"></span>
+    <span class="legend-cell legend-4"></span>
+    <span class="legend-label">多</span>
+  </div>
+  <HeatmapIsland client:visible />
+</section>

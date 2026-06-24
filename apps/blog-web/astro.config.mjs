@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import vue from "@astrojs/vue";
 import { fileURLToPath } from "node:url";
 
 // https://astro.build/config
@@ -8,6 +9,7 @@ export default defineConfig({
   site: "https://your-domain.com",
   integrations: [
     sitemap(),
+    vue(),
   ],
   markdown: {
     shikiConfig: {
@@ -17,6 +19,11 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        external: ["/pagefind/pagefind.js"],
+      },
+    },
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
