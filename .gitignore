@@ -1,37 +1,72 @@
+# ========================================
 # Dependencies
+# ========================================
 node_modules/
 .pnpm-store/
+vendor/
 
+# ========================================
 # Build output
+# ========================================
 dist/
 .astro/
+*.exe
+*.exe~
 
-# IDE
+# ========================================
+# IDE & Editor
+# ========================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# ========================================
+# OS files
+# ========================================
 .DS_Store
 Thumbs.db
+Desktop.ini
 
+# ========================================
 # Logs
+# ========================================
 *.log
 storage/logs/
 
-# Runtime data (Phase 2+)
+# ========================================
+# Runtime data — NEVER commit to Git
+# ========================================
 data/
 storage/uploads/
 storage/backups/
 releases/
 current
 
-# Environment
+# ========================================
+# Environment — contains secrets
+# ========================================
 .env
 .env.local
 .env.*.local
+.env.production
 
-# Test coverage
+# ========================================
+# Test & Coverage
+# ========================================
 coverage/
+*.test
+
+# ========================================
+# Go specific
+# ========================================
+apps/admin-api/admin-api
+apps/admin-api/admin-api.exe
+apps/admin-api/tmp/
+
+# ========================================
+# Temporary files
+# ========================================
+*.tmp
+tmp/
